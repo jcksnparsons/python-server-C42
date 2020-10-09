@@ -43,6 +43,15 @@ def get_single_customer(id):
 
     return requested_customer
 
+def update_customer(id, new_customer):
+    # Iterate the CUSTOMERS list, but use enumerate() so that
+    # you can access the index value of each item.
+    for index, customer in enumerate(CUSTOMERS):
+        if customer["id"] == id:
+            # Found the customer. Update the value.
+            CUSTOMERS[index] = new_customer
+            break
+
 def delete_customer(id):
     # Initial -1 value for customer index, in case one isn't found
     customer_index = -1
