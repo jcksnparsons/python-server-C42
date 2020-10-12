@@ -70,7 +70,7 @@ class HandleRequests(BaseHTTPRequestHandler):
             if id is not None:
                 response = f"{get_single_customer(id)}"
             else:
-                response = f"{get_all_employees()}"
+                response = f"{get_all_customers()}"
 
         self.wfile.write(response.encode())
 
