@@ -36,7 +36,8 @@ def get_all_customers():
         SELECT
             c.id,
             c.name,
-            c.address
+            c.address,
+            c.email
         FROM customer c
         """)
 
@@ -46,7 +47,7 @@ def get_all_customers():
 
         for row in dataset:
 
-            customer = Customer(row['id'], row['name'], row['address'])
+            customer = Customer(row['id'], row['name'], row['address'], row['email'])
 
             customers.append(customer.__dict__)
 
@@ -66,7 +67,9 @@ def get_single_customer(id):
         SELECT
             c.id,
             c.name,
-            c.address
+            c.address,
+            c.email,
+            c.password
         FROM customer c
         WHERE c.id = ?
         """, (id, ))
@@ -75,9 +78,33 @@ def get_single_customer(id):
         data = db_cursor.fetchone()
 
         # Create an animal instance from the current row
-        customer = Customer(data['name'], data['address'],
-                            data['id'])
+        customer = Customer(data['id'], data['name'],
+                            data['address'], data['email'], data['password'])
 
+        return json.dumps(customer.__dict__)
+
+
+def get_customer_by_email(email):
+
+    with sqlite3.connect("./kennel.db") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        SELECT
+            c.id,
+            c.name,
+            c.address
+        FROM Customer c
+        WHERE c.email = ?
+        """, (email, ))
+
+        data = db_cursor.fetchone()
+
+        # Create an customer instance from the current row
+        customer = Customer(data['name'], data['id'], data['address'])
+
+        # Return the JSON serialized Customer object
         return json.dumps(customer.__dict__)
 
 
@@ -89,6 +116,7 @@ def update_customer(id, new_customer):
             # Found the customer. Update the value.
             CUSTOMERS[index] = new_customer
             break
+
 
 def delete_customer(id):
     # Initial -1 value for customer index, in case one isn't found

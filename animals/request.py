@@ -63,6 +63,62 @@ def get_single_animal(id):
 
         return json.dumps(animal.__dict__)
 
+def get_animals_by_location(location_id):
+    with sqlite3.connect("./kennel.db") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        SELECT
+            a.id,
+            a.name,
+            a.breed,
+            a.status,
+            a.customer_id,
+            a.location_id
+        FROM animal a
+        WHERE a.location_id = ?
+        """, ( location_id, ))
+
+        animals = []
+
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            animal = Animal(row["id"], row["name"], row["breed"], row["status"], row["customer_id"], row["location_id"])
+
+            animals.append(animal.__dict__)
+
+        return json.dumps(animals)
+
+def get_animals_by_status(status):
+    with sqlite3.connect("./kennel.db") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        SELECT
+            a.id,
+            a.name,
+            a.breed,
+            a.status,
+            a.customer_id,
+            a.location_id
+        FROM animal a
+        WHERE a.status = ?
+        """, ( status, ))
+
+        animals = []
+
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            animal = Animal(row["id"], row["name"], row["breed"], row["status"], row["customer_id"], row["location_id"])
+
+            animals.append(animal.__dict__)
+
+        return json.dumps(animals)
+
 
 def create_animal(animal):
     # Get the id value of the last animal in the list

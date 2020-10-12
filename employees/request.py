@@ -31,6 +31,7 @@ from models import Employee
 #     }
 # ]
 
+
 def get_all_employees():
     with sqlite3.connect("./kennel.db") as conn:
         conn.row_factory = sqlite3.Row
@@ -40,6 +41,7 @@ def get_all_employees():
         SELECT
             e.id,
             e.name,
+            e.address,
             e.location_id
         FROM employee e
         """)
@@ -50,7 +52,8 @@ def get_all_employees():
 
         for row in dataset:
 
-            employee = Employee(row['id'], row['name'], row['location_id'])
+            employee = Employee(row['id'], row['name'],
+                                row['address'], row['location_id'])
 
             employees.append(employee.__dict__)
 
@@ -70,6 +73,7 @@ def get_single_employee(id):
         SELECT
             e.id,
             e.name,
+            e.address,
             e.location_id
         FROM employee e
         WHERE e.id = ?
@@ -79,10 +83,39 @@ def get_single_employee(id):
         data = db_cursor.fetchone()
 
         # Create an animal instance from the current row
-        employee = Employee(data['name'], data['location_id'],
-                            data['id'])
+        employee = Employee(data['id'], data['name'],
+                            data['address'], data['location_id'])
 
         return json.dumps(employee.__dict__)
+
+
+def get_employees_by_location(location_id):
+    with sqlite3.connect("./kennel.db") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        SELECT
+            e.id,
+            e.name,
+            e.address,
+            e.location_id
+        FROM employee e
+        WHERE e.location_id = ?
+        """, (location_id, ))
+
+        employees = []
+
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            employee = Employee(row["id"], row["name"],
+                                row["address"], row["location_id"])
+
+            employees.append(employee.__dict__)
+
+        return json.dumps(employees)
+
 
 def create_employee(employee):
     # Get the id value of the last employee in the list
@@ -100,6 +133,7 @@ def create_employee(employee):
     # Return the dictionary with `id` property added
     return employee
 
+
 def update_employee(id, new_employee):
     # Iterate the EMPLOYEES list, but use enumerate() so that
     # you can access the index value of each item.
@@ -108,6 +142,7 @@ def update_employee(id, new_employee):
             # Found the employee. Update the value.
             EMPLOYEES[index] = new_employee
             break
+
 
 def delete_employee(id):
     # Initial -1 value for employee index, in case one isn't found
