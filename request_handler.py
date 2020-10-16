@@ -60,35 +60,36 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Parse the URL and capture the tuple that is returned
         parsed = self.parse_url(self.path)
 
-        if type(parsed[1]) is int:
+        if parsed[1] is None:
+            resource = parsed[0]
+
+            if resource == "animals":
+                response = f"{get_all_animals()}"
+
+            elif resource == "locations":
+                response = f"{get_all_locations()}"
+
+            elif resource == "employees":
+                response = f"{get_all_employees()}"
+
+            elif resource == "customers":
+                response = f"{get_all_customers()}"
+
+        elif type(parsed[1]) is int:
             (resource, id) = parsed
 
             if resource == "animals":
-                if id is not None:
-                    response = f"{get_single_animal(id)}"
-
-                else:
-                    response = f"{get_all_animals()}"
+                response = f"{get_single_animal(id)}"
 
             elif resource == "locations":
-                if id is not None:
-                    response = f"{get_single_location(id)}"
-
-                else:
-                    response = f"{get_all_locations()}"
+                response = f"{get_single_location(id)}"
 
             elif resource == "employees":
-                if id is not None:
-                    response = f"{get_single_employee(id)}"
-
-                else:
-                    response = f"{get_all_employees()}"
+                response = f"{get_single_employee(id)}"
 
             elif resource == "customers":
-                if id is not None:
-                    response = f"{get_single_customer(id)}"
-                else:
-                    response = f"{get_all_customers()}"
+                response = f"{get_single_customer(id)}"
+             
 
         elif type(parsed[1]) is dict:
             (resource, query_dict) = parsed
