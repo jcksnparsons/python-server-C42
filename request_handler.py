@@ -28,7 +28,7 @@ class HandleRequests(BaseHTTPRequestHandler):
                 
                 query_dict[deconstructed_query[0]] = deconstructed_query[1]
 
-            return ( resource, query_dict )
+            return ( params[0], query_dict )
 
         # No query string parameter
         else:
