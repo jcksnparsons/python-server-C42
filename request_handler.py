@@ -18,13 +18,17 @@ class HandleRequests(BaseHTTPRequestHandler):
         if "?" in resource:
             # GIVEN: /customers?email=jenna@solis.com
 
-            param = resource.split("?")[1]  # email=jenna@solis.com
-            resource = resource.split("?")[0]  # 'customers'
-            pair = param.split("=")  # [ 'email', 'jenna@solis.com' ]
-            key = pair[0]  # 'email'
-            value = pair[1]  # 'jenna@solis.com'
+            params = resource.split("?")  # email=jenna@solis.com
+            queries_list = params[1].split("&")
 
-            return ( resource, key, value )
+            query_dict = {}
+
+            for query in queries_list:
+                deconstructed_query = query.split("=")
+                
+                query_dict[deconstructed_query[0]] = deconstructed_query[1]
+
+            return ( resource, query_dict )
 
         # No query string parameter
         else:
@@ -56,7 +60,7 @@ class HandleRequests(BaseHTTPRequestHandler):
         # Parse the URL and capture the tuple that is returned
         parsed = self.parse_url(self.path)
 
-        if len(parsed) == 2:
+        if type(parsed[1]) is int:
             (resource, id) = parsed
 
             if resource == "animals":
@@ -86,21 +90,25 @@ class HandleRequests(BaseHTTPRequestHandler):
                 else:
                     response = f"{get_all_customers()}"
 
-        elif len(parsed) == 3:
-            (resource, key, value) = parsed
+        elif type(parsed[1]) is dict:
+            (resource, query_dict) = parsed
 
-            if key == "email" and resource == "customers":
-                response = f"{get_customer_by_email(value)}"
+            for key, value in query_dict.items():
 
-            elif resource == "animals":
-                if key == "location_id":
-                    response = f"{get_animals_by_location(value)}"
+                if resource == "animals":
+                    if key == "status":
+                        response = f"{get_animals_by_status(value)}"
 
-                elif key == "status":
-                    response = f"{get_animals_by_status(value)}"
+                    elif key == "location_id":
+                        response = f"{get_animals_by_location(value)}"
 
-            elif resource == "employees" and key == "location_id":
-                response = f"{get_employees_by_location(value)}"
+                elif resource == "employees":
+                    if key == "location_id":
+                        response = f"{get_employees_by_location(value)}"
+
+                elif resource == "customers":
+                    if key == "email":
+                        response = f"{get_customer_by_email(value)}"
 
         self.wfile.write(response.encode())
 
