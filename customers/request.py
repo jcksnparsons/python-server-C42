@@ -83,6 +83,36 @@ def get_single_customer(id):
 
         return json.dumps(customer.__dict__)
 
+def get_customers_with_query_strings(query_dict):
+    with sqlite3.connect("./kennel.db") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+
+        query_string_list = []
+
+        for key, value in query_dict.items():
+            query_string = f"""a.{key} = '{value}'"""
+
+            query_string_list.append(query_string)
+
+        SQL_string_argument = " AND ".join(query_string_list)
+
+        SQL_query = f"SELECT c.id, c.name, c.address, c.email, c.status FROM Customer c WHERE {SQL_string_argument}"
+
+        db_cursor.execute(SQL_query)
+
+        customers = []
+
+        dataset = db_cursor.fetchall()
+
+        for row in dataset:
+            animal = Animal(row["id"], row["name"], row["breed"],
+                            row["status"], row["location_id"], row["customer_id"])
+
+            customers.append(animal.__dict__)
+
+        return json.dumps(customers)
+
 
 def get_customer_by_email(email):
 
